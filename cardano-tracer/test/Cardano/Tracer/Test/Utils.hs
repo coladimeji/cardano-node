@@ -6,11 +6,9 @@ module Cardano.Tracer.Test.Utils
   , removeDirectoryContent
   ) where
 
-import           Control.Exception (finally)
-import           Control.Monad.Extra (whenM)
-import           System.Directory.Extra (doesFileExist, listDirectories,
-                   removeFile, removePathForcibly)
-import           System.FilePath (dropDrive)
+import           System.Directory.Extra (listDirectories,
+                   removePathForcibly)
+import           System.FilePath ((</>), (<.>), dropDrive, takeBaseName)
 import           System.IO.Extra (newTempDir, newTempFile)
 import           System.Info.Extra (isMac, isWindows)
 import           Test.Tasty.QuickCheck
@@ -22,42 +20,30 @@ propRunInLogsStructure
   :: (FilePath -> FilePath -> IO Property)
   -> Property
 propRunInLogsStructure testAction = ioProperty $ do
-  (rootDir, deleteDir) <- newTempDir
+  (rootDir, _)   <- newTempDir
   (localSock, _) <- newTempFile
-  let preparedLocalSock = prepareLocalSock localSock
-  testAction rootDir preparedLocalSock
-    `finally` (removeFile' preparedLocalSock >> deleteDir)
+  testAction rootDir (prepareLocalSock localSock)
 
 propRunInLogsStructure2
   :: (FilePath -> FilePath -> FilePath -> IO Property)
   -> Property
 propRunInLogsStructure2 testAction = ioProperty $ do
-  (rootDir, deleteDir) <- newTempDir
+  (rootDir, _)    <- newTempDir
   (localSock1, _) <- newTempFile
   (localSock2, _) <- newTempFile
-  let preparedLocalSock1 = prepareLocalSock localSock1
-      preparedLocalSock2 = prepareLocalSock localSock2
-  testAction rootDir preparedLocalSock1 preparedLocalSock2
-    `finally` (   removeFile' preparedLocalSock1
-               >> removeFile' preparedLocalSock2
-               >> deleteDir)
+  testAction rootDir (prepareLocalSock localSock1) (prepareLocalSock localSock2)
 
 prepareLocalSock :: FilePath -> FilePath
-prepareLocalSock localSock =
-  if isWindows
-    then pipeForWindows
-    else if isMac
-           then sockForMac
-           else localSock
+prepareLocalSock localSock
+  | isWindows = pipeForWindows
+  | isMac     = sockForMac
+  | otherwise = localSock
  where
   pipeForWindows = "\\\\.\\pipe\\" <> dropDrive localSock
-  sockForMac = "/tmp/cardano-tracer-test.pipe"
+  sockForMac = "/tmp" </> takeBaseName localSock <.> "pipe"
 
 removeDirectoryContent :: FilePath -> IO ()
 removeDirectoryContent dir = listDirectories dir >>= mapM_ removePathForcibly
-
-removeFile' :: FilePath -> IO ()
-removeFile' f = whenM (doesFileExist f) $ removeFile f
 
 doesDirectoryEmpty :: FilePath -> IO Bool
 doesDirectoryEmpty = fmap null . listDirectories
