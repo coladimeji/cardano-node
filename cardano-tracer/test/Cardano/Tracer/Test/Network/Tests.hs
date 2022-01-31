@@ -43,6 +43,7 @@ propNetworkForwarder rootDir localSock =
 propNetwork' :: FilePath -> (IO (), IO ()) -> IO Property
 propNetwork' rootDir (fstSide, sndSide) = do
   f <- asyncBound fstSide
+  sleep 1.0
   s <- asyncBound sndSide
   -- Now sides should be connected and do some work.
   sleep 3.0
