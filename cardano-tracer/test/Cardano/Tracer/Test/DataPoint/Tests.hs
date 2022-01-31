@@ -36,18 +36,23 @@ propDataPoint rootDir localSock = do
   dpRequestors <- initDataPointRequestors
   savedDPValues :: TVar DataPointValues <- newTVarIO []
   withAsync (doRunCardanoTracer config stopProtocols dpRequestors) . const $
-    withAsync (launchForwardersSimple Responder localSock 1000 10000) . const $ do
+    withAsync (launchForwardersSimple Initiator localSock 1000 10000) . const $ do
       sleep 1.0
       -- We know that there is one single "node" only (and one single requestor too).
-      ((_, dpRequestor):_) <- M.toList <$> readTVarIO dpRequestors
-      dpValues <- askForDataPoints dpRequestor ["test.data.point", "some.wrong.Name"]
-      atomically . modifyTVar' savedDPValues . const $ dpValues
-      applyBrake stopProtocols
-      sleep 0.5
+      -- requestors ((_, dpRequestor):_) <- M.toList <$> readTVarIO dpRequestors
+      requestors <- M.toList <$> readTVarIO dpRequestors
+      case requestors of
+        [] -> return ()
+        ((_, dpRequestor):_) -> do
+          dpValues <- askForDataPoints dpRequestor ["test.data.point", "some.wrong.Name"]
+          atomically . modifyTVar' savedDPValues . const $ dpValues
+          applyBrake stopProtocols
+          sleep 0.5
 
   dpValues <- readTVarIO savedDPValues
-  if length dpValues == 2
-    then
+  case length dpValues of
+    0 -> false "No DataPoints values!"
+    2 ->
       case lookup "test.data.point" dpValues of
         Just (Just rawValue) ->
           case decode' rawValue of
@@ -60,11 +65,11 @@ propDataPoint rootDir localSock = do
                 else false "Unexpected valid value"
             Nothing -> false "Incorrect JSON for of the value DataPoint"
         _ -> false "No value of the valid DataPoint"
-    else false "Not 2 values"
+    _ -> false "Not expected number of DataPoints!"
  where
   config = TracerConfig
     { networkMagic   = 764824073
-    , network        = ConnectTo $ NE.fromList [LocalSocket localSock]
+    , network        = AcceptAt (LocalSocket localSock) -- ConnectTo $ NE.fromList [LocalSocket localSock]
     , loRequestNum   = Just 1
     , ekgRequestFreq = Just 1.0
     , hasEKG         = Nothing

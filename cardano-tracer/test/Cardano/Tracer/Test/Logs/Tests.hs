@@ -108,7 +108,6 @@ propMultiResp format rootDir localSock = do
         sleep 3.0 -- Wait till some work is done.
         applyBrake stopProtocols
         sleep 0.5
-
   checkMultiResults rootDir
  where
   config root p = TracerConfig
@@ -132,10 +131,9 @@ checkMultiResults rootDir =
       -- ... and contains two nodes' subdirs...
       listDirectory rootDir >>= \case
         [] -> false "root dir is empty"
-        [subDir1, subDir2] ->
-          withCurrentDirectory rootDir $ do
-            -- ... with *.log-files inside...
-            subDir1list <- listDirectory subDir1
-            subDir2list <- listDirectory subDir2
-            return . property $ notNull subDir1list && notNull subDir2list
+        [subDir1, subDir2] -> do
+          -- ... with *.log-files inside...
+          subDir1list <- listDirectory $ rootDir </> subDir1
+          subDir2list <- listDirectory $ rootDir </> subDir2
+          return . property $ notNull subDir1list && notNull subDir2list
         _ -> false "root dir contains not 2 subdirs"

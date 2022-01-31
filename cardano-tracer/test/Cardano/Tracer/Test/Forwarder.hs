@@ -15,8 +15,7 @@ import           Codec.CBOR.Term (Term)
 import           Control.Concurrent (threadDelay)
 import           Control.Concurrent.Async
 import           Control.Monad (forever)
-import           "contra-tracer" Control.Tracer (nullTracer)
--- import           "contra-tracer" Control.Tracer (contramap, stdoutTracer)
+import           "contra-tracer" Control.Tracer (nullTracer, contramap, stdoutTracer)
 import           Data.Aeson (FromJSON, ToJSON)
 import qualified Data.ByteString.Lazy as LBS
 import           Data.Time.Clock (getCurrentTime)
@@ -125,7 +124,7 @@ launchForwardersSimple' iomgr mode p connSize disconnSize =
   dpfConfig :: DPF.ForwarderConfiguration
   dpfConfig =
     DPF.ForwarderConfiguration
-      { DPF.forwarderTracer = nullTracer -- contramap show stdoutTracer -- nullTracer
+      { DPF.forwarderTracer = contramap show stdoutTracer -- nullTracer
       , DPF.acceptorEndpoint = p
       }
 
