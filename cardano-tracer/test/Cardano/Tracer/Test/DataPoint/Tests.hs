@@ -35,9 +35,10 @@ propDataPoint rootDir localSock = do
   stopProtocols <- initProtocolsBrake
   dpRequestors <- initDataPointRequestors
   savedDPValues :: TVar DataPointValues <- newTVarIO []
-  withAsync (doRunCardanoTracer config stopProtocols dpRequestors) . const $
+  withAsync (doRunCardanoTracer config stopProtocols dpRequestors) . const $ do
+    sleep 1.0
     withAsync (launchForwardersSimple Initiator localSock 1000 10000) . const $ do
-      sleep 1.0
+      sleep 1.5
       -- We know that there is one single "node" only (and one single requestor too).
       -- requestors ((_, dpRequestor):_) <- M.toList <$> readTVarIO dpRequestors
       requestors <- M.toList <$> readTVarIO dpRequestors
