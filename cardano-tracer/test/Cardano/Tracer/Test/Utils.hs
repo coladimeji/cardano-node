@@ -3,11 +3,9 @@ module Cardano.Tracer.Test.Utils
   , false
   , propRunInLogsStructure
   , propRunInLogsStructure2
-  , removeDirectoryContent
   ) where
 
-import           System.Directory.Extra (listDirectories,
-                   removePathForcibly)
+import           System.Directory.Extra (listDirectories)
 import           System.FilePath ((</>), (<.>), dropDrive, takeBaseName)
 import           System.IO.Extra (newTempDir, newTempFile)
 import           System.Info.Extra (isMac, isWindows)
@@ -41,9 +39,6 @@ prepareLocalSock localSock
  where
   pipeForWindows = "\\\\.\\pipe\\" <> dropDrive localSock
   sockForMac = "/tmp" </> takeBaseName localSock <.> "pipe"
-
-removeDirectoryContent :: FilePath -> IO ()
-removeDirectoryContent dir = listDirectories dir >>= mapM_ removePathForcibly
 
 doesDirectoryEmpty :: FilePath -> IO Bool
 doesDirectoryEmpty = fmap null . listDirectories
