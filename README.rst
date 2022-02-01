@@ -46,23 +46,12 @@ echo PATH="~/.local/bin:$PATH" >> ~/.bashrc
 source ~/.bashrc
 
 
-
-
-
-
 # Update cabal and verify the correct versions were installed successfully:
 # At this moment Cabal library should be version 3.2.0.0 and GHC should be version 8.6.5
 
 cabal update
 cabal -V
 ghc -V
-
-
-
-
-
-
-
 
 ---------------------------------------------------------------------
 2. Build the node from source code
@@ -78,10 +67,6 @@ git tag
 git checkout tags/1.14.2
 
 
-
-
-
-
 # Build the cardano-node from source code:
 
 
@@ -92,82 +77,15 @@ cabal install cardano-node cardano-cli  --overwrite-policy=always
 
 
 
-
-
-
-
 # Copy cardano-cli and cardano-node files into bin directory.
 
 sudo cp $HOME/.cabal/bin/cardano-cli /usr/local/bin/cardano-cli
 sudo cp $HOME/.cabal/bin/cardano-node /usr/local/bin/cardano-node
 
-
-
-
-
-
 # version check:
 
 cardano-node version
 cardano-cli version
-
-
-
-
-
-
-----------------------------------------------------------
-
-2. Build the node from source code
-
-
-# Download source code and switch to the latest tag. In this case, use release/1.14.2
-
-cd ~
-git clone https://github.com/input-output-hk/cardano-node.git
-cd cardano-node
-git fetch --all --tags
-git tag
-git checkout tags/1.14.2
-
-
-
-
-
-
-# Build the cardano-node from source code:
-
-
-echo -e "package cardano-crypto-praos\n flags: -external-libsodium-vrf" > cabal.project.local
-cabal install cardano-node cardano-cli  --overwrite-policy=always
-
-# Building process may take a few minutes up to a few hours depending on your computer's processing power.
-
-
-
-
-
-
-
-# Copy cardano-cli and cardano-node files into bin directory.
-
-sudo cp $HOME/.cabal/bin/cardano-cli /usr/local/bin/cardano-cli
-sudo cp $HOME/.cabal/bin/cardano-node /usr/local/bin/cardano-node
-
-
-
-
-
-
-# version check:
-
-cardano-node version
-cardano-cli version
-
-
-
-
-
 
 -----------------------------------------------------
 
@@ -180,10 +98,6 @@ mkdir relaynode1
 mkdir relaynode2
 cp shelley_testnet-*.json relaynode1
 cp shelley_testnet-*.json relaynode2
-
-
-
-
 
 
 # Update relaynode1 (shelley_testnet-topology.json) with the following:
@@ -286,9 +200,6 @@ EOF
 
 
 
-
-
-
 # relaynode1:
 
 cat > relaynode1/startRelayNode1.sh << EOF 
@@ -318,11 +229,6 @@ SOCKET_PATH=\${DIRECTORY}/db/socket
 CONFIG=\${DIRECTORY}/shelley_testnet-config.json
 cardano-node run --topology \${TOPOLOGY} --database-path \${DB_PATH} --socket-path \${SOCKET_PATH} --host-addr \${HOSTADDR} --port \${PORT} --config \${CONFIG}
 EOF
-
-
-
-
-
 
 
 ----------------------------------------------------------
