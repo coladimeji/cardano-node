@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Cardano.Tracer.Test.Network.Tests
   ( tests
   ) where
